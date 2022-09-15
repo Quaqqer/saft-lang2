@@ -42,14 +42,11 @@ spec = do
       parse float "" `shouldFailOn` "123"
 
   describe "general tokenization" $ do
-    it "tokenizes streams" $ do
-      parse
-        tokenize
-        ""
-        "let x = 3;"
-        `shouldParse` [ Let,
-                        Identifier "x",
-                        Operator "=",
-                        Integer "3",
-                        Semicolon
-                      ]
+    it "tokenizes streams" $
+      let res1 = [Let, Identifier "x", Operator "=", Integer "3", Semicolon]
+          res2 = [Let, Identifier "x", Operator "=", Float "3.3", Semicolon]
+       in do
+            parse tokenize "" "let x = 3;" `shouldParse` res1
+            parse tokenize "" "let x = 3  ;" `shouldParse` res1
+            parse tokenize "" "let x = 3.3;" `shouldParse` res2
+            parse tokenize "" "let x = 3.3  ;" `shouldParse` res2
