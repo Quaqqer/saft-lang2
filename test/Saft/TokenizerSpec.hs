@@ -1,6 +1,7 @@
-module Saft.Parser.TokenizerSpec (spec) where
+module Saft.TokenizerSpec (spec) where
 
-import Saft.Parser.Tokenizer
+import Saft.Token
+import Saft.Tokenizer
 import Test.Hspec
 import Test.Hspec.Megaparsec
 import Text.Megaparsec

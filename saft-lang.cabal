@@ -29,7 +29,8 @@ library
       Saft.Ast.Statement
       Saft.Ast.Type
       Saft.Parser.Internal
-      Saft.Parser.Tokenizer
+      Saft.Token
+      Saft.Tokenizer
   other-modules:
       Paths_saft_lang
   hs-source-dirs:
@@ -44,7 +45,7 @@ library
       RecordWildCards
       TupleSections
       ViewPatterns
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
     , containers
@@ -87,7 +88,7 @@ test-suite saft-lang-test
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   other-modules:
-      Saft.Parser.TokenizerSpec
+      Saft.TokenizerSpec
       Paths_saft_lang
   hs-source-dirs:
       test

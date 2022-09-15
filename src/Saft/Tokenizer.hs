@@ -1,4 +1,4 @@
-module Saft.Parser.Tokenizer
+module Saft.Tokenizer
   ( Token (..),
     tokenize,
     operator,
@@ -15,38 +15,12 @@ import Data.List (singleton)
 import qualified Data.Set as Set
 import qualified Data.Text as T
 import Data.Void (Void)
+import Saft.Token
 import Text.Megaparsec hiding (Token)
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void T.Text
-
-{- ORMOLU_DISABLE -}
-data Token
-  -- Keywords
-  = Let
-  | Fn
-
-  -- Symbols
-  | Colon      -- :
-  | Semicolon  -- ;
-  | Dot        -- .
-  | LParen     -- (
-  | RParen     -- )
-  | LBrace     -- {
-  | RBrace     -- }
-
-  -- Identifiers and operators
-  | Identifier T.Text
-  | Operator T.Text
-
-  -- Data
-  | Integer T.Text
-  | Float T.Text
-  | String T.Text
-
-  deriving (Show, Eq)
-{- ORMOLU_ENABLE -}
 
 sc :: Parser ()
 sc =
