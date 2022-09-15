@@ -16,6 +16,9 @@ dependencies:
   - megaparsec >= 9.2.2
   - text
   - containers
+  - hspec >= 2.8.5
+  - hspec-discover >= 2.8.5
+  - hspec-megaparsec >= 2.2.0
 
 ghc-options:
   - -Wall
@@ -27,6 +30,9 @@ ghc-options:
   - -Wmissing-home-modules
   - -Wpartial-fields
   - -Wredundant-constraints
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
 
 default-extensions:
   [
@@ -48,20 +54,12 @@ executables:
   saft-lang-exe:
     main: Main.hs
     source-dirs: app
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
     dependencies:
       - saft-lang
 
 tests:
   saft-lang-test:
-    main: Spec.hs
+    main: Driver.hs
     source-dirs: test
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
     dependencies:
       - saft-lang

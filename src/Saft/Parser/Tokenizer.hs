@@ -1,4 +1,4 @@
-module Saft.Parser.Tokenizer (Token (..), tokenizer) where
+module Saft.Parser.Tokenizer (Token (..), tokenizer, operator) where
 
 import Control.Monad (liftM2)
 import qualified Data.Set as Set
@@ -14,6 +14,7 @@ data Token
   = Let
   | Identifier T.Text
   | Operator T.Text
+  deriving (Show, Eq)
 
 sc :: Parser ()
 sc =
@@ -29,7 +30,7 @@ operatorChars :: Set.Set Char
 operatorChars = Set.fromList "!#$%&*+./<=>?@\\^|-~:"
 
 operator :: Parser Token
-operator = Operator . T.pack <$> many (satisfy (`Set.member` operatorChars))
+operator = Operator . T.pack <$> some (satisfy (`Set.member` operatorChars))
 
 tokenizer :: Parser [Token]
 tokenizer = do

@@ -42,10 +42,13 @@ library
       RecordWildCards
       TupleSections
       ViewPatterns
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , containers
+    , hspec >=2.8.5
+    , hspec-discover >=2.8.5
+    , hspec-megaparsec >=2.2.0
     , megaparsec >=9.2.2
     , text
   default-language: Haskell2010
@@ -70,6 +73,9 @@ executable saft-lang-exe
   build-depends:
       base >=4.7 && <5
     , containers
+    , hspec >=2.8.5
+    , hspec-discover >=2.8.5
+    , hspec-megaparsec >=2.2.0
     , megaparsec >=9.2.2
     , saft-lang
     , text
@@ -77,8 +83,9 @@ executable saft-lang-exe
 
 test-suite saft-lang-test
   type: exitcode-stdio-1.0
-  main-is: Spec.hs
+  main-is: Driver.hs
   other-modules:
+      Saft.Parser.TokenizerSpec
       Paths_saft_lang
   hs-source-dirs:
       test
@@ -96,6 +103,9 @@ test-suite saft-lang-test
   build-depends:
       base >=4.7 && <5
     , containers
+    , hspec >=2.8.5
+    , hspec-discover >=2.8.5
+    , hspec-megaparsec >=2.2.0
     , megaparsec >=9.2.2
     , saft-lang
     , text
