@@ -7,16 +7,49 @@ import Text.Megaparsec
 
 spec :: Spec
 spec = do
-  it "tokenizes operators" $ do
-    parse operator "" "<$>" `shouldParse` Operator "<$>"
-    parse operator "" "==" `shouldParse` Operator "=="
-    parse operator "" "+" `shouldParse` Operator "+"
-    parse operator "" "-" `shouldParse` Operator "-"
-    parse operator "" "^" `shouldParse` Operator "^"
-    parse operator "" "&&" `shouldParse` Operator "&&"
-    parse operator "" "||" `shouldParse` Operator "||"
-    parse operator "" "<" `shouldParse` Operator "<"
-  it "does not parse invalid operators" $ do
-    parse operator "" `shouldFailOn` ""
-    parse operator "" `shouldFailOn` "and"
-    parse operator "" `shouldFailOn` "or"
+  describe "operator parsing" $ do
+    it "parses operators" $ do
+      parse operator "" "<$>" `shouldParse` Operator "<$>"
+      parse operator "" "==" `shouldParse` Operator "=="
+      parse operator "" "+" `shouldParse` Operator "+"
+      parse operator "" "-" `shouldParse` Operator "-"
+      parse operator "" "^" `shouldParse` Operator "^"
+      parse operator "" "&&" `shouldParse` Operator "&&"
+      parse operator "" "||" `shouldParse` Operator "||"
+      parse operator "" "<" `shouldParse` Operator "<"
+
+    it "does not parse invalid operators" $ do
+      parse operator "" `shouldFailOn` ""
+      parse operator "" `shouldFailOn` "and"
+      parse operator "" `shouldFailOn` "or"
+
+  describe "identifier parsing" $ do
+    it "parses identifiers" $ do
+      parse identifier "" "hello" `shouldParse` Identifier "hello"
+      parse identifier "" "_hello" `shouldParse` Identifier "_hello"
+      parse identifier "" "_1" `shouldParse` Identifier "_1"
+      parse identifier "" "_" `shouldParse` Identifier "_"
+      parse identifier "" "a1" `shouldParse` Identifier "a1"
+    it "does not parse invalid identifiers" $ do
+      parse identifier "" `shouldFailOn` "Asd"
+      parse identifier "" `shouldFailOn` "X"
+      parse identifier "" `shouldFailOn` "123"
+      parse identifier "" `shouldFailOn` "1a"
+
+  describe "float parsing" $ do
+    it "parses floats" $ do
+      parse float "" "123.2" `shouldParse` Float "123.2"
+      parse float "" `shouldFailOn` "123"
+
+  describe "general tokenization" $ do
+    it "tokenizes streams" $ do
+      parse
+        tokenize
+        ""
+        "let x = 3;"
+        `shouldParse` [ Let,
+                        Identifier "x",
+                        Operator "=",
+                        Integer "3",
+                        Semicolon
+                      ]

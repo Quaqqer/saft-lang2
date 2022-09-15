@@ -25,8 +25,10 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
-      Saft.Parser
+      Saft.Ast.Internal
+      Saft.Ast.Statement
+      Saft.Ast.Type
+      Saft.Parser.Internal
       Saft.Parser.Tokenizer
   other-modules:
       Paths_saft_lang
