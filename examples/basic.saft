@@ -1,0 +1,19 @@
+trait Eq {
+    fn eq(Self, Self) -> bool;
+}
+
+impl Eq for i32 {
+    fn eq(lhs: i32, rhs: i32) {
+        return saft#data#i32#eq(lhs, rhs);
+    }
+}
+
+infix<T: Eq> l 6 ==(lhs: T, rhs: T) -> bool {
+    return lhs.eq(rhs);
+}
+
+prefix<T: Neg> 6(T) -> bool;
+
+void main() {
+    let a = 2;
+}

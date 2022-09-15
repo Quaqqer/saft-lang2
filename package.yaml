@@ -13,6 +13,9 @@ description: Please see the README on GitHub at <https://github.com/quaqqer/saft
 
 dependencies:
   - base >= 4.7 && < 5
+  - megaparsec >= 9.2.2
+  - text
+  - containers
 
 ghc-options:
   - -Wall
@@ -27,6 +30,7 @@ ghc-options:
 
 default-extensions:
   [
+    OverloadedStrings,
     DisambiguateRecordFields,
     DuplicateRecordFields,
     LambdaCase,
