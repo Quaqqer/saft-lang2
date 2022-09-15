@@ -45,8 +45,10 @@ spec = do
     it "tokenizes streams" $
       let res1 = [Let, Identifier "x", Operator "=", Integer "3", Semicolon]
           res2 = [Let, Identifier "x", Operator "=", Float "3.3", Semicolon]
+          res3 = [Let, Identifier "abc", Operator "=", String "hello there", Semicolon]
        in do
             parse tokenize "" "let x = 3;" `shouldParse` res1
             parse tokenize "" "let x = 3  ;" `shouldParse` res1
             parse tokenize "" "let x = 3.3;" `shouldParse` res2
             parse tokenize "" "let x = 3.3  ;" `shouldParse` res2
+            parse tokenize "" "let abc = \"hello there\"  ;" `shouldParse` res3

@@ -11,6 +11,7 @@ module Saft.Parser.Tokenizer
 where
 
 import Control.Monad (liftM2)
+import Data.List (singleton)
 import qualified Data.Set as Set
 import qualified Data.Text as T
 import Data.Void (Void)
@@ -106,6 +107,17 @@ float = try $
     i2 <- T.pack <$> some numberChar
     return (Float $ i1 <> "." <> i2)
 
+string_ :: Parser Token
+string_ = try $
+  lexeme $ do
+    _ <- char '"'
+    str <-
+      foldl (<>) ""
+        <$> manyTill
+          (string "\\\"" <|> (T.pack . singleton <$> satisfy (const True)))
+          (string "\"")
+    return $ String str
+
 tokenize :: Parser [Token]
 tokenize = do
   sc
@@ -116,3 +128,4 @@ tokenize = do
       <|> operator
       <|> float
       <|> integer
+      <|> string_
