@@ -1,5 +1,5 @@
 module Saft.Tokenizer
-  ( Token (..),
+  ( SToken (..),
     tokenize,
     operator,
     identifier,
@@ -16,7 +16,7 @@ import qualified Data.Set as Set
 import qualified Data.Text as T
 import Data.Void (Void)
 import Saft.Token
-import Text.Megaparsec hiding (Token)
+import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
@@ -35,7 +35,7 @@ symbol = L.symbol sc
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
 
-identifier :: Parser Token
+identifier :: Parser SToken
 identifier =
   try $
     lexeme $
@@ -46,20 +46,20 @@ identifier =
 operatorChars :: Set.Set Char
 operatorChars = Set.fromList "!#$%&*+./<=>?@\\^|-~:"
 
-operator :: Parser Token
+operator :: Parser SToken
 operator = try $ lexeme $ Operator . T.pack <$> some (satisfy (`Set.member` operatorChars))
 
-tokensFromList :: [(T.Text, Token)] -> Parser Token
+tokensFromList :: [(T.Text, SToken)] -> Parser SToken
 tokensFromList l = foldl1 (<|>) (map (\(s, t) -> t <$ symbol s) l)
 
-keyword :: Parser Token
+keyword :: Parser SToken
 keyword =
   tokensFromList
     [ ("let", Let),
       ("fn", Fn)
     ]
 
-symbols :: Parser Token
+symbols :: Parser SToken
 symbols =
   tokensFromList
     [ (":", Colon),
@@ -70,10 +70,10 @@ symbols =
       ("}", LBrace)
     ]
 
-integer :: Parser Token
+integer :: Parser SToken
 integer = try $ lexeme $ Integer . T.pack <$> some numberChar
 
-float :: Parser Token
+float :: Parser SToken
 float = try $
   lexeme $ do
     i1 <- T.pack <$> some numberChar
@@ -81,7 +81,7 @@ float = try $
     i2 <- T.pack <$> some numberChar
     return (Float $ i1 <> "." <> i2)
 
-string_ :: Parser Token
+string_ :: Parser SToken
 string_ = try $
   lexeme $ do
     _ <- char '"'
@@ -92,7 +92,7 @@ string_ = try $
           (string "\"")
     return $ String str
 
-tokenize :: Parser [Token]
+tokenize :: Parser [SToken]
 tokenize = do
   sc
   many $
