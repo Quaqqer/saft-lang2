@@ -1,5 +1,6 @@
 module Saft.TokenizerSpec (spec) where
 
+import qualified Data.Text as T
 import Saft.Token
 import Saft.Tokenizer
 import Test.Hspec
@@ -68,3 +69,24 @@ spec = do
             parse tokenize "" "letasd" `shouldParse` [Identifier "letasd"]
             parse tokenize "" "let{}" `shouldParse` [Let, LBrace, RBrace]
             parse tokenize "" "{x}" `shouldParse` [LBrace, Identifier "x", RBrace]
+
+    it "skips comments" $ do
+      parse tokenize "" "// hello there" `shouldParse` []
+      parse tokenize "" "let // hello there" `shouldParse` [Let]
+      parse tokenize "" "/* hello there */" `shouldParse` []
+      parse tokenize "" "/*/* hello there */*/" `shouldParse` []
+      parse tokenize "" "let /*/* hello there */*/ x" `shouldParse` [Let, Identifier "x"]
+
+      let s1 =
+            "let // let\n\
+            \x" ::
+              T.Text
+      parse tokenize "" s1 `shouldParse` [Let, Identifier "x"]
+
+      let s2 =
+            "let /* let\n\
+            \let\n\
+            \*/\n\
+            \x" ::
+              T.Text
+      parse tokenize "" s2 `shouldParse` [Let, Identifier "x"]
