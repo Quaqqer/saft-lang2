@@ -29,8 +29,8 @@ sc =
     (L.skipLineComment "//")
     (L.skipBlockCommentNested "/*" "*/")
 
-symbol :: T.Text -> Parser T.Text
-symbol = L.symbol sc
+-- symbol :: T.Text -> Parser T.Text
+-- symbol = L.symbol sc
 
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
@@ -49,26 +49,34 @@ operatorChars = Set.fromList "!#$%&*+./<=>?@\\^|-~:"
 operator :: Parser SToken
 operator = try $ lexeme $ Operator . T.pack <$> some (satisfy (`Set.member` operatorChars))
 
-tokensFromList :: [(T.Text, SToken)] -> Parser SToken
-tokensFromList l = foldl1 (<|>) (map (\(s, t) -> t <$ symbol s) l)
+tokensFromList :: [(T.Text, SToken)] -> [Parser SToken]
+tokensFromList = map (\(s, t) -> t <$ string s)
 
 keyword :: Parser SToken
 keyword =
-  tokensFromList
-    [ ("let", Let),
-      ("fn", Fn)
-    ]
+  choice
+    ( map
+        (\p -> lexeme (p <* notFollowedBy alphaNumChar))
+        ( tokensFromList
+            [ ("let", Let),
+              ("fn", Fn)
+            ]
+        )
+    )
 
 symbols :: Parser SToken
 symbols =
-  tokensFromList
-    [ (":", Colon),
-      (";", Semicolon),
-      ("(", LParen),
-      (")", RParen),
-      ("{", LBrace),
-      ("}", LBrace)
-    ]
+  choice
+    ( map lexeme $
+        tokensFromList
+          [ (":", Colon),
+            (";", Semicolon),
+            ("(", LParen),
+            (")", RParen),
+            ("{", LBrace),
+            ("}", RBrace)
+          ]
+    )
 
 integer :: Parser SToken
 integer = try $ lexeme $ Integer . T.pack <$> some numberChar
@@ -95,11 +103,16 @@ string_ = try $
 tokenize :: Parser [SToken]
 tokenize = do
   sc
-  many $
-    keyword
-      <|> symbols
-      <|> identifier
-      <|> operator
-      <|> float
-      <|> integer
-      <|> string_
+
+  parsedTokens <-
+    many $
+      try keyword
+        <|> symbols
+        <|> identifier
+        <|> operator
+        <|> float
+        <|> integer
+        <|> string_
+  eof
+
+  return parsedTokens
