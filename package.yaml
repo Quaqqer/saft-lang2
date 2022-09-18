@@ -19,6 +19,7 @@ dependencies:
   - hspec >= 2.8.5
   - hspec-discover >= 2.8.5
   - hspec-megaparsec >= 2.2.0
+  - optparse-applicative >= 0.16.1.0
 
 ghc-options:
   - -Wall
