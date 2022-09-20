@@ -1,6 +1,6 @@
 module Saft.Tokenizer
   ( SToken (..),
-    tokenize,
+    tokenizer,
     operator,
     identifier,
     keyword,
@@ -67,15 +67,18 @@ keyword =
 symbols :: Parser SToken
 symbols =
   choice
-    ( map lexeme $
-        tokensFromList
-          [ (":", Colon),
-            (";", Semicolon),
-            ("(", LParen),
-            (")", RParen),
-            ("{", LBrace),
-            ("}", RBrace)
-          ]
+    ( map
+        lexeme
+        ( tokensFromList
+            [ (":", Colon),
+              (";", Semicolon),
+              ("(", LParen),
+              (")", RParen),
+              ("{", LBrace),
+              ("}", RBrace)
+            ]
+            ++ [Equals <$ try (string "=" <* notFollowedBy "=")]
+        )
     )
 
 integer :: Parser SToken
@@ -100,8 +103,8 @@ string_ = try $
           (string "\"")
     return $ String str
 
-tokenize :: Parser [SToken]
-tokenize = do
+tokenizer :: Parser [SToken]
+tokenizer = do
   sc
 
   parsedTokens <-

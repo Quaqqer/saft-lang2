@@ -55,33 +55,33 @@ spec = do
 
   describe "general tokenization" $ do
     it "tokenizes streams" $
-      let res1 = [Let, Identifier "x", Operator "=", Integer "3", Semicolon]
-          res2 = [Let, Identifier "x", Operator "=", Float "3.3", Semicolon]
-          res3 = [Let, Identifier "abc", Operator "=", String "hello there", Semicolon]
-          res4 = [Identifier "leasd", Identifier "abc", Operator "=", String "hello there", Semicolon]
+      let res1 = [Let, Identifier "x", Equals, Integer "3", Semicolon]
+          res2 = [Identifier "x", Operator "==", Float "3.3", Semicolon]
+          res3 = [Let, Identifier "abc", Equals, String "hello there", Semicolon]
+          res4 = [Identifier "leasd", Identifier "abc", Equals, String "hello there", Semicolon]
        in do
-            parse tokenize "" "let x = 3;" `shouldParse` res1
-            parse tokenize "" "let x = 3  ;" `shouldParse` res1
-            parse tokenize "" "let x = 3.3;" `shouldParse` res2
-            parse tokenize "" "let x = 3.3  ;" `shouldParse` res2
-            parse tokenize "" "let abc = \"hello there\"  ;" `shouldParse` res3
-            parse tokenize "" "leasd abc = \"hello there\"  ;" `shouldParse` res4
-            parse tokenize "" "letasd" `shouldParse` [Identifier "letasd"]
-            parse tokenize "" "let{}" `shouldParse` [Let, LBrace, RBrace]
-            parse tokenize "" "{x}" `shouldParse` [LBrace, Identifier "x", RBrace]
+            parse tokenizer "" "let x = 3;" `shouldParse` res1
+            parse tokenizer "" "let x = 3  ;" `shouldParse` res1
+            parse tokenizer "" "x == 3.3;" `shouldParse` res2
+            parse tokenizer "" " x == 3.3  ;   " `shouldParse` res2
+            parse tokenizer "" "let abc = \"hello there\"  ;" `shouldParse` res3
+            parse tokenizer "" "leasd abc = \"hello there\"  ;" `shouldParse` res4
+            parse tokenizer "" "letasd" `shouldParse` [Identifier "letasd"]
+            parse tokenizer "" "let{}" `shouldParse` [Let, LBrace, RBrace]
+            parse tokenizer "" "{x}" `shouldParse` [LBrace, Identifier "x", RBrace]
 
     it "skips comments" $ do
-      parse tokenize "" "// hello there" `shouldParse` []
-      parse tokenize "" "let // hello there" `shouldParse` [Let]
-      parse tokenize "" "/* hello there */" `shouldParse` []
-      parse tokenize "" "/*/* hello there */*/" `shouldParse` []
-      parse tokenize "" "let /*/* hello there */*/ x" `shouldParse` [Let, Identifier "x"]
+      parse tokenizer "" "// hello there" `shouldParse` []
+      parse tokenizer "" "let // hello there" `shouldParse` [Let]
+      parse tokenizer "" "/* hello there */" `shouldParse` []
+      parse tokenizer "" "/*/* hello there */*/" `shouldParse` []
+      parse tokenizer "" "let /*/* hello there */*/ x" `shouldParse` [Let, Identifier "x"]
 
       let s1 =
             "let // let\n\
             \x" ::
               T.Text
-      parse tokenize "" s1 `shouldParse` [Let, Identifier "x"]
+      parse tokenizer "" s1 `shouldParse` [Let, Identifier "x"]
 
       let s2 =
             "let /* let\n\
@@ -89,4 +89,4 @@ spec = do
             \*/\n\
             \x" ::
               T.Text
-      parse tokenize "" s2 `shouldParse` [Let, Identifier "x"]
+      parse tokenizer "" s2 `shouldParse` [Let, Identifier "x"]

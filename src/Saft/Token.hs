@@ -29,6 +29,7 @@ data SToken
   | RParen     -- )
   | LBrace     -- {
   | RBrace     -- }
+  | Equals     -- =
 
   -- Identifiers and operators
   | Identifier T.Text
