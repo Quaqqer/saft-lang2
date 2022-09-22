@@ -1,6 +1,7 @@
 module Saft.Tokenizer
   ( SToken (..),
     tokenizer,
+    tokenize,
     operator,
     identifier,
     keyword,
@@ -35,24 +36,25 @@ sc =
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
 
-identifier :: Parser SToken
+identifier :: Parser (WithPos SToken)
 identifier =
   try $
     lexeme $
-      Identifier
-        . T.pack
-        <$> liftM2 (:) (lowerChar <|> char '_') (many alphaNumChar)
+      withPos $
+        Identifier
+          . T.pack
+          <$> liftM2 (:) (lowerChar <|> char '_') (many alphaNumChar)
 
 operatorChars :: Set.Set Char
 operatorChars = Set.fromList "!#$%&*+./<=>?@\\^|-~:"
 
-operator :: Parser SToken
-operator = try $ lexeme $ Operator . T.pack <$> some (satisfy (`Set.member` operatorChars))
+operator :: Parser (WithPos SToken)
+operator = try $ lexeme $ withPos $ Operator . T.pack <$> some (satisfy (`Set.member` operatorChars))
 
-tokensFromList :: [(T.Text, SToken)] -> [Parser SToken]
-tokensFromList = map (\(s, t) -> t <$ string s)
+tokensFromList :: [(T.Text, SToken)] -> [Parser (WithPos SToken)]
+tokensFromList = map (\(s, t) -> withPos (t <$ string s))
 
-keyword :: Parser SToken
+keyword :: Parser (WithPos SToken)
 keyword =
   choice
     ( map
@@ -64,7 +66,7 @@ keyword =
         )
     )
 
-symbols :: Parser SToken
+symbols :: Parser (WithPos SToken)
 symbols =
   choice
     ( map
@@ -77,33 +79,50 @@ symbols =
               ("{", LBrace),
               ("}", RBrace)
             ]
-            ++ [Equals <$ try (string "=" <* notFollowedBy "=")]
+            ++ [withPos (Equals <$ try (string "=" <* notFollowedBy "="))]
         )
     )
 
-integer :: Parser SToken
-integer = try $ lexeme $ Integer . T.pack <$> some numberChar
+integer :: Parser (WithPos SToken)
+integer = try $ lexeme $ withPos $ Integer . T.pack <$> some numberChar
 
-float :: Parser SToken
+float :: Parser (WithPos SToken)
 float = try $
-  lexeme $ do
-    i1 <- T.pack <$> some numberChar
-    _ <- char '.'
-    i2 <- T.pack <$> some numberChar
-    return (Float $ i1 <> "." <> i2)
+  lexeme $
+    withPos $ do
+      i1 <- T.pack <$> some numberChar
+      _ <- char '.'
+      i2 <- T.pack <$> some numberChar
+      return (Float $ i1 <> "." <> i2)
 
-string_ :: Parser SToken
+string_ :: Parser (WithPos SToken)
 string_ = try $
-  lexeme $ do
-    _ <- char '"'
-    str <-
-      foldl (<>) ""
-        <$> manyTill
-          (string "\\\"" <|> (T.pack . singleton <$> satisfy (const True)))
-          (string "\"")
-    return $ String str
+  lexeme $
+    withPos $ do
+      _ <- char '"'
+      str <-
+        foldl (<>) ""
+          <$> manyTill
+            (string "\\\"" <|> (T.pack . singleton <$> satisfy (const True)))
+            (string "\"")
+      return $ String str
 
-tokenizer :: Parser [SToken]
+withPos :: Parser SToken -> Parser (WithPos SToken)
+withPos p = do
+  startPos <- getSourcePos
+  startOffset <- getOffset
+  tokenVal <- p
+  endOffset <- getOffset
+  endPos <- getSourcePos
+  return $
+    WithPos
+      { tokenVal,
+        startPos,
+        endPos,
+        tokenLength = endOffset - startOffset
+      }
+
+tokenizer :: Parser [WithPos SToken]
 tokenizer = do
   sc
 
@@ -119,3 +138,8 @@ tokenizer = do
   eof
 
   return parsedTokens
+
+tokenize :: String -> T.Text -> Either (ParseErrorBundle T.Text Void) TokenStream
+tokenize fileName text = do
+  tokens_ <- runParser tokenizer fileName text
+  return $ TokenStream {streamInput = text, tokens = tokens_}

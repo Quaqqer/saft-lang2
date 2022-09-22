@@ -4,8 +4,7 @@ import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Options.Applicative
-import Saft.Tokenizer (tokenizer)
-import Text.Megaparsec (runParser)
+import qualified Saft.Tokenizer as Tokenizer
 
 data CliArgs = CliArgs
   { modules :: [Text],
@@ -34,7 +33,7 @@ cliArgsInfo =
 
 cli :: IO ()
 cli = do
-  args@CliArgs {modules} <- execParser cliArgsInfo
+  CliArgs {modules} <- execParser cliArgsInfo
 
   files <-
     Map.fromList
@@ -42,6 +41,6 @@ cli = do
         (\fileName -> (fileName,) . Text.pack <$> readFile (Text.unpack fileName))
         modules
 
-  let tokens = Map.mapWithKey (runParser tokenizer . Text.unpack) files
+  let tokens = Map.mapWithKey (Tokenizer.tokenize . Text.unpack) files
 
-  print tokens
+  print $ tokens

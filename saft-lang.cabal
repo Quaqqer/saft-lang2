@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Saft.Ast.Expression
       Saft.Ast.Internal
       Saft.Ast.Statement
       Saft.Ast.Type

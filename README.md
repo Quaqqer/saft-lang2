@@ -27,3 +27,14 @@ The goals that the language have are the following:
 - Tree-sitter parser
 - Linter
 - Build tool
+
+# Progress
+## What has been done
+
+- Tokens 8/10
+- Tokenizer 4/10
+
+## What is being done
+
+- Parsing
+- Ast

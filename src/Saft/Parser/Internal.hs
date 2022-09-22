@@ -5,6 +5,8 @@ import qualified Saft.Token as Token
 import Text.Megaparsec
 -- import Saft.Ast.Statement
 -- import Saft.Token
+-- import qualified Saft.Ast.Statement as Ast.Stmt
+-- import qualified Saft.Ast.Expression as Ast.Expr
 
 type Parser = Parsec Void Token.SToken
 
@@ -16,3 +18,9 @@ type Parser = Parsec Void Token.SToken
 --   _ <- char Fn
 --   ident <- anySingle
 --   fail "I expected an identifier"
+
+-- statement :: Parser Ast.Stmt.Statement
+-- statement = 
+--
+-- function :: Parser Ast.Stmt.Statement
+-- function = char Let
