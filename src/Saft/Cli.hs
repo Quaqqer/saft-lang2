@@ -5,6 +5,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Options.Applicative
 import qualified Saft.Tokenizer as Tokenizer
+import Text.Megaparsec (errorBundlePretty)
 
 data CliArgs = CliArgs
   { modules :: [Text],
@@ -43,4 +44,11 @@ cli = do
 
   let tokens = Map.mapWithKey (Tokenizer.tokenize . Text.unpack) files
 
-  print $ tokens
+  mapM_
+    ( ( \case
+          Right r -> print r
+          Left err -> putStrLn $ errorBundlePretty err
+      )
+        . snd
+    )
+    (Map.toList tokens)
