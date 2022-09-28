@@ -65,7 +65,9 @@ keyword =
               ("void", TVoid),
               ("bool", TBool),
               ("int", TInt),
-              ("float", TFloat)
+              ("float", TFloat),
+              ("true", Bool True),
+              ("false", Bool False)
             ]
         )
     )
@@ -79,10 +81,12 @@ symbols =
             [ (":", Colon),
               (",", Comma),
               (";", Semicolon),
+              (".", Dot),
               ("(", LParen),
               (")", RParen),
               ("{", LBrace),
-              ("}", RBrace)
+              ("}", RBrace),
+              ("->", Arrow)
             ]
             ++ [withPos (Equals <$ try (string "=" <* notFollowedBy "="))]
         )

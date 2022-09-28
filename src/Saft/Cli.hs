@@ -1,14 +1,15 @@
 module Saft.Cli (CliArgs (..), cliArgs, cliArgsInfo, cli) where
 
-import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Options.Applicative
+import qualified Saft.Parser.Internal as SP
 import qualified Saft.Tokenizer as Tokenizer
-import Text.Megaparsec (errorBundlePretty)
+import System.Exit (exitFailure)
+import Text.Megaparsec (errorBundlePretty, runParser)
 
 data CliArgs = CliArgs
-  { modules :: [Text],
+  { modules :: [String],
     mainIs :: Maybe Text
   }
   deriving (Show, Eq)
@@ -36,19 +37,34 @@ cli :: IO ()
 cli = do
   CliArgs {modules} <- execParser cliArgsInfo
 
-  files <-
-    Map.fromList
-      <$> mapM
-        (\fileName -> (fileName,) . Text.pack <$> readFile (Text.unpack fileName))
-        modules
+  moduleFiles <-
+    mapM
+      (\fileName -> (fileName,) . Text.pack <$> readFile fileName)
+      modules
 
-  let tokens = Map.mapWithKey (Tokenizer.tokenize . Text.unpack) files
-
-  mapM_
-    ( ( \case
-          Right r -> print r
-          Left err -> putStrLn $ errorBundlePretty err
+  moduleTokens <-
+    mapM
+      ( \(fn, text) ->
+          let mt = Tokenizer.tokenize fn text
+           in case mt of
+                Right tokens -> return (fn, tokens)
+                Left errBundle -> do
+                  putStrLn ("Could not parse module " ++ fn ++ ".\n")
+                  putStrLn $ errorBundlePretty errBundle
+                  exitFailure
       )
-        . snd
-    )
-    (Map.toList tokens)
+      moduleFiles
+
+  modules_ <-
+    mapM
+      ( \(fn, tokens) ->
+          let mModule_ = runParser SP.module_ fn tokens
+           in case mModule_ of
+                Right module_ -> return (fn, module_)
+                Left errBundle -> do
+                  putStrLn $ errorBundlePretty errBundle
+                  exitFailure
+      )
+      moduleTokens
+
+  print modules_

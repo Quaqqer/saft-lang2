@@ -62,7 +62,8 @@ data WithPos a = WithPos
 data TokenStream = TokenStream
   { streamInput :: T.Text,
     tokens :: [WithPos SToken]
-  } deriving (Show)
+  }
+  deriving (Show)
 
 instance Stream TokenStream where
   type Token TokenStream = WithPos SToken

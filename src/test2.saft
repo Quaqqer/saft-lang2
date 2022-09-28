@@ -1,0 +1,11 @@
+fn main() {
+
+}
+
+fn test() -> int {
+
+}
+
+fn test2() -> float {
+
+}

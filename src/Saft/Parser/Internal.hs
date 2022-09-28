@@ -1,16 +1,16 @@
-module Saft.Parser.Internal (Parser) where
+module Saft.Parser.Internal (Parser, module_) where
 
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.Set as Set
 import Data.Text (Text)
 import Data.Void (Void)
+import Saft.Ast.Module
 import Saft.Ast.Statement
 import Saft.Ast.Type as Ty
 import Saft.Token as Tk
 import qualified Saft.Token as Token
 import Text.Megaparsec
-import Saft.Ast.Module
 
 type Parser = Parsec Void TokenStream
 
@@ -58,7 +58,7 @@ type_ =
       ]
 
 module_ :: Parser Module
-module_ = Module <$> many statement
+module_ = Module <$> many statement <* eof
 
 statement :: Parser Statement
 statement = fn
