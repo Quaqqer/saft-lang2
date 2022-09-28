@@ -7,11 +7,22 @@ import Test.Hspec
 import Test.Hspec.Megaparsec
 import Text.Megaparsec
 
-shouldParseTokens :: (HasCallStack, ShowErrorComponent e,  VisualStream s, TraversableStream s) => Either (ParseErrorBundle s e) [WithPos SToken] -> [SToken] -> Expectation
+shouldParseTokens ::
+  (HasCallStack, ShowErrorComponent e, VisualStream s, TraversableStream s) =>
+  Either (ParseErrorBundle s e) [WithPos SToken] ->
+  [SToken] ->
+  Expectation
 shouldParseTokens parseResult = shouldParse (map tokenVal <$> parseResult)
 
-shouldParseToken :: (HasCallStack, ShowErrorComponent e,  VisualStream s, TraversableStream s) => Either (ParseErrorBundle s e) (WithPos SToken) -> SToken -> Expectation
+shouldParseToken ::
+  (HasCallStack, ShowErrorComponent e, VisualStream s, TraversableStream s) =>
+  Either (ParseErrorBundle s e) (WithPos SToken) ->
+  SToken ->
+  Expectation
 shouldParseToken parseResult = shouldParse (tokenVal <$> parseResult)
+
+shouldTokenize :: T.Text -> [SToken] -> Expectation
+shouldTokenize text tokens_ = parse tokenizer "" text `shouldParseTokens` tokens_
 
 spec :: Spec
 spec = do
@@ -59,6 +70,23 @@ spec = do
       parse float "" "123.2" `shouldParseToken` Float "123.2"
       parse float "" `shouldFailOn` "123"
 
+    it "skips comments" $ do
+      "// hello there" `shouldTokenize` []
+      "let // hello there" `shouldTokenize` [Let]
+      "/* hello there */" `shouldTokenize` []
+      "/*/* hello there */*/" `shouldTokenize` []
+      "let /*/* hello there */*/ x" `shouldTokenize` [Let, Identifier "x"]
+
+      "let // let\n\
+      \x"
+        `shouldTokenize` [Let, Identifier "x"]
+
+      "let /* let\n\
+      \let\n\
+      \*/\n\
+      \x"
+        `shouldTokenize` [Let, Identifier "x"]
+
   describe "general tokenization" $ do
     it "tokenizes streams" $
       let res1 = [Let, Identifier "x", Equals, Int "3", Semicolon]
@@ -66,33 +94,29 @@ spec = do
           res3 = [Let, Identifier "abc", Equals, String "hello there", Semicolon]
           res4 = [Identifier "leasd", Identifier "abc", Equals, String "hello there", Semicolon]
        in do
-            parse tokenizer "" "let x = 3;" `shouldParseTokens` res1
-            parse tokenizer "" "let x = 3  ;" `shouldParseTokens` res1
-            parse tokenizer "" "x == 3.3;" `shouldParseTokens` res2
-            parse tokenizer "" " x == 3.3  ;   " `shouldParseTokens` res2
-            parse tokenizer "" "let abc = \"hello there\"  ;" `shouldParseTokens` res3
-            parse tokenizer "" "leasd abc = \"hello there\"  ;" `shouldParseTokens` res4
-            parse tokenizer "" "letasd" `shouldParseTokens` [Identifier "letasd"]
-            parse tokenizer "" "let{}" `shouldParseTokens` [Let, LBrace, RBrace]
-            parse tokenizer "" "{x}" `shouldParseTokens` [LBrace, Identifier "x", RBrace]
+            "let x = 3;" `shouldTokenize` res1
+            "let x = 3  ;" `shouldTokenize` res1
 
-    it "skips comments" $ do
-      parse tokenizer "" "// hello there" `shouldParseTokens` []
-      parse tokenizer "" "let // hello there" `shouldParseTokens` [Let]
-      parse tokenizer "" "/* hello there */" `shouldParseTokens` []
-      parse tokenizer "" "/*/* hello there */*/" `shouldParseTokens` []
-      parse tokenizer "" "let /*/* hello there */*/ x" `shouldParseTokens` [Let, Identifier "x"]
+            "x == 3.3;" `shouldTokenize` res2
+            " x == 3.3  ;   " `shouldTokenize` res2
 
-      let s1 =
-            "let // let\n\
-            \x" ::
-              T.Text
-      parse tokenizer "" s1 `shouldParseTokens` [Let, Identifier "x"]
+            "let abc = \"hello there\"  ;" `shouldTokenize` res3
 
-      let s2 =
-            "let /* let\n\
-            \let\n\
-            \*/\n\
-            \x" ::
-              T.Text
-      parse tokenizer "" s2 `shouldParseTokens` [Let, Identifier "x"]
+            "leasd abc = \"hello there\"  ;" `shouldTokenize` res4
+
+            "letasd" `shouldTokenize` [Identifier "letasd"]
+
+            "let{}" `shouldTokenize` [Let, LBrace, RBrace]
+
+            "{x}" `shouldTokenize` [LBrace, Identifier "x", RBrace]
+
+            "fn main() -> int {}"
+              `shouldTokenize` [ Fn,
+                                 Identifier "main",
+                                 LParen,
+                                 RParen,
+                                 Arrow,
+                                 TInt,
+                                 LBrace,
+                                 RBrace
+                               ]
