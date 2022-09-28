@@ -61,7 +61,7 @@ spec = do
 
   describe "general tokenization" $ do
     it "tokenizes streams" $
-      let res1 = [Let, Identifier "x", Equals, Integer "3", Semicolon]
+      let res1 = [Let, Identifier "x", Equals, Int "3", Semicolon]
           res2 = [Identifier "x", Operator "==", Float "3.3", Semicolon]
           res3 = [Let, Identifier "abc", Equals, String "hello there", Semicolon]
           res4 = [Identifier "leasd", Identifier "abc", Equals, String "hello there", Semicolon]

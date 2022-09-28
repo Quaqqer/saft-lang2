@@ -27,6 +27,7 @@ library
   exposed-modules:
       Saft.Ast.Expression
       Saft.Ast.Internal
+      Saft.Ast.Module
       Saft.Ast.Statement
       Saft.Ast.Type
       Saft.Cli

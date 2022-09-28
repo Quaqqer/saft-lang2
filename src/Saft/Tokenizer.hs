@@ -61,7 +61,11 @@ keyword =
         (\p -> lexeme (p <* notFollowedBy alphaNumChar))
         ( tokensFromList
             [ ("let", Let),
-              ("fn", Fn)
+              ("fn", Fn),
+              ("void", TVoid),
+              ("bool", TBool),
+              ("int", TInt),
+              ("float", TFloat)
             ]
         )
     )
@@ -73,6 +77,7 @@ symbols =
         lexeme
         ( tokensFromList
             [ (":", Colon),
+              (",", Comma),
               (";", Semicolon),
               ("(", LParen),
               (")", RParen),
@@ -84,7 +89,7 @@ symbols =
     )
 
 integer :: Parser (WithPos SToken)
-integer = try $ lexeme $ withPos $ Integer . T.pack <$> some numberChar
+integer = try $ lexeme $ withPos $ Int . T.pack <$> some numberChar
 
 float :: Parser (WithPos SToken)
 float = try $

@@ -22,6 +22,7 @@ data SToken
 
   -- Symbols
   | Colon      -- :
+  | Comma      -- ,
   | Semicolon  -- ;
   | Dot        -- .
   | LParen     -- (
@@ -29,13 +30,21 @@ data SToken
   | LBrace     -- {
   | RBrace     -- }
   | Equals     -- =
+  | Arrow      -- ->
 
   -- Identifiers and operators
   | Identifier T.Text
   | Operator T.Text
 
+  -- Types
+  | TVoid
+  | TBool
+  | TInt
+  | TFloat
+
   -- Data
-  | Integer T.Text
+  | Bool Bool
+  | Int T.Text
   | Float T.Text
   | String T.Text
 
