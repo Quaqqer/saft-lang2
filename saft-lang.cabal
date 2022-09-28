@@ -94,6 +94,7 @@ test-suite saft-lang-test
   main-is: Driver.hs
   other-modules:
       Saft.CliSpec
+      Saft.ParserSpec
       Saft.TokenizerSpec
       Paths_saft_lang
   hs-source-dirs:

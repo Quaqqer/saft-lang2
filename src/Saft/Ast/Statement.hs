@@ -9,4 +9,4 @@ data Statement = Function
     body :: [Statement],
     returnType :: Type
   }
-  deriving (Show)
+  deriving (Show, Eq)
