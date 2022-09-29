@@ -2,6 +2,7 @@
 
 module Saft.Compiler (generateIR, printIR, compileIR) where
 
+import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.String (fromString)
@@ -19,17 +20,16 @@ import qualified LLVM.Target as LLVM
 import qualified Saft.Ast.Module as S
 import qualified Saft.Ast.Statement as S
 import qualified Saft.Ast.Type as S
-import qualified Data.ByteString.Char8 as BS
 
 llvmType :: S.Type -> LLVMAST.Type
 llvmType t = fromJust $ Map.lookup t m
   where
     m = Map.fromList typeEdges
     typeEdges =
-      [ (S.Void, LLVMAST.VoidType),
-        (S.Bool, LLVMAST.IntegerType 1),
-        (S.Int, LLVMAST.IntegerType 32),
-        (S.Float, LLVMAST.FloatingPointType LLVMAST.DoubleFP)
+      [ (S.Void, LLVMAST.void),
+        (S.Bool, LLVMAST.i1),
+        (S.Int, LLVMAST.i32),
+        (S.Float, LLVMAST.double)
       ]
 
 generateIR :: String -> Text -> S.Module -> LLVMAST.Module
@@ -44,8 +44,6 @@ generateIR name mainIs (S.Module {body}) =
           )
           body
 
-    return ()
-
     generateMain (fromJust (Map.lookup mainIs fns))
 
 generateOuter :: S.Statement -> LLVMIR.ModuleBuilder LLVMAST.Operand
@@ -59,7 +57,7 @@ generateOuter
     ) =
     do
       function
-        (LLVMAST.mkName (Text.unpack identifier))
+        (LLVMAST.mkName ("s_" ++ Text.unpack identifier))
         (map (\(id', ty) -> (llvmType ty, fromString (Text.unpack id'))) arguments)
         (llvmType returnType)
         $ \_ -> do
