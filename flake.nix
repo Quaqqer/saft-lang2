@@ -8,7 +8,13 @@
       in {
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = [ pkgs.bashInteractive ];
-          buildInputs = with pkgs; [ stack ormolu hlint ];
+          buildInputs = with pkgs; [
+            stack
+            ormolu
+            hlint
+            llvmPackages_12.llvm
+            clang_12
+          ];
         };
       });
 }

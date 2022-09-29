@@ -4,3 +4,7 @@
 # Direnv
 .envrc
 .direnv/
+
+# Compiled files
+out
+*.out

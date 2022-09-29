@@ -5,4 +5,4 @@ data Type
   | Bool
   | Int
   | Float
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)

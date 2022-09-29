@@ -31,6 +31,7 @@ library
       Saft.Ast.Statement
       Saft.Ast.Type
       Saft.Cli
+      Saft.Compiler
       Saft.Parser.Internal
       Saft.Token
       Saft.Tokenizer
@@ -51,10 +52,13 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , containers
     , hspec >=2.8.5
     , hspec-discover >=2.8.5
     , hspec-megaparsec >=2.2.0
+    , llvm-hs
+    , llvm-hs-pure
     , megaparsec >=9.2.2
     , optparse-applicative >=0.16.1.0
     , text
@@ -79,10 +83,13 @@ executable saft-lang-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , containers
     , hspec >=2.8.5
     , hspec-discover >=2.8.5
     , hspec-megaparsec >=2.2.0
+    , llvm-hs
+    , llvm-hs-pure
     , megaparsec >=9.2.2
     , optparse-applicative >=0.16.1.0
     , saft-lang
@@ -112,10 +119,13 @@ test-suite saft-lang-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , containers
     , hspec >=2.8.5
     , hspec-discover >=2.8.5
     , hspec-megaparsec >=2.2.0
+    , llvm-hs
+    , llvm-hs-pure
     , megaparsec >=9.2.2
     , optparse-applicative >=0.16.1.0
     , saft-lang
