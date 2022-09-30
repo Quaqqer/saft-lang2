@@ -32,6 +32,7 @@ library
       Saft.Ast.Type
       Saft.Cli
       Saft.Compiler
+      Saft.Jit
       Saft.Parser.Internal
       Saft.Token
       Saft.Tokenizer

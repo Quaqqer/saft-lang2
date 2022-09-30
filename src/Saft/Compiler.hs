@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-incomplete-record-updates #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module Saft.Compiler (generateIR, printIR, compileIR) where
 
@@ -68,12 +69,12 @@ generateMain :: LLVMAST.Operand -> LLVMIR.ModuleBuilder ()
 generateMain mainIs = do
   _ <- function
     "saft_entry"
-    [(LLVMAST.i32, "argc"), (LLVMAST.ptr (LLVMAST.ptr LLVMAST.i8), "argv")]
+    []
     (LLVMAST.IntegerType 32)
-    $ \_ -> do
+    $ \[] -> do
       _entry <- block `named` "entry"
       _ <- call mainIs []
-      ret $ int32 128
+      ret $ int32 123
 
   return ()
 
