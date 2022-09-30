@@ -24,16 +24,7 @@ runJit astModule = do
     LLVM.withHostTargetMachineDefault $ \tm ->
       LLVM.withModuleFromAST ctx astModule $ \mod -> do
         -- Run optimization passes
-        optimized <- LLVM.withPassManager passes $ flip LLVM.runPassManager mod
-
-        when optimized $ putStrLn "\nOptimized"
-
-        s <- LLVM.moduleLLVMAssembly mod
-
-        BS.putStrLn s
-
-        putStrLn "Running..."
-        putStrLn "---"
+        _ <- LLVM.withPassManager passes $ flip LLVM.runPassManager mod
 
         ORC.withExecutionSession $ \es -> do
           let dylibName = "saft"

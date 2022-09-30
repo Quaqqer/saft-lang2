@@ -1,6 +1,5 @@
 module Saft.Cli (CliArgs (..), cliArgs, cliArgsInfo, cli) where
 
-import Data.Maybe (fromJust)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.IO.Exception (ExitCode (..))
@@ -15,8 +14,7 @@ import Text.Megaparsec (errorBundlePretty, runParser)
 data CliArgs = CliArgs
   { modules :: [String],
     mainIs :: Text,
-    outputFile :: String,
-    jit :: Bool
+    outputFile :: Maybe String
   }
   deriving (Show, Eq)
 
@@ -35,19 +33,13 @@ cliArgs =
           <> help "The main function of the program"
           <> value "main"
       )
-    <*> strOption
-      ( long "output-file"
-          <> short 'o'
-          <> metavar "OUTPUT"
-          <> help "Output file path"
-          <> value "out"
-      )
-    <*> flag
-      False
-      True
-      ( long "jit"
-          <> short 'j'
-          <> help "Run with JIT compiler"
+    <*> optional
+      ( strOption
+          ( long "output-file"
+              <> short 'o'
+              <> metavar "OUTPUT"
+              <> help "Output file path"
+          )
       )
 
 cliArgsInfo :: ParserInfo CliArgs
@@ -59,8 +51,7 @@ cli = do
   CliArgs
     { modules,
       mainIs,
-      outputFile,
-      jit
+      outputFile
     } <-
     execParser cliArgsInfo
 
@@ -97,13 +88,12 @@ cli = do
   let [(fn, mod)] = modules_ -- TODO: Compile multiple modules
   let ir = generateIR fn mainIs mod
 
-  if jit
-    then do
+  case outputFile of
+    Nothing -> do
       -- Run the jit
       Just exitCode <- runJit ir
       exitWith $
         if exitCode == 0
           then ExitSuccess
           else ExitFailure exitCode
-    else do
-      compileIR outputFile ir
+    Just f -> compileIR f ir
