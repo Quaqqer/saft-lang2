@@ -10,8 +10,8 @@ import qualified LLVM.AST as LLVMAST
 import qualified LLVM.Context as LLVM
 import qualified LLVM.OrcJIT as ORC
 import qualified LLVM.PassManager as LLVM
-import LLVM.Prelude
 import qualified LLVM.Target as LLVM
+import System.IO (hPutStrLn, stderr)
 
 foreign import ccall "dynamic" haskFun :: FunPtr (IO Int) -> IO Int
 
@@ -23,8 +23,18 @@ runJit astModule = do
   LLVM.withContext $ \ctx ->
     LLVM.withHostTargetMachineDefault $ \tm ->
       LLVM.withModuleFromAST ctx astModule $ \mod -> do
+        -- Print unoptimized llvm assembly
+        as <- LLVM.moduleLLVMAssembly mod
+        hPutStrLn stderr "Unoptimized:"
+        BS.hPutStrLn stderr as
+
         -- Run optimization passes
         _ <- LLVM.withPassManager passes $ flip LLVM.runPassManager mod
+
+        -- Print optimized llvm assembly
+        as <- LLVM.moduleLLVMAssembly mod
+        hPutStrLn stderr "\nOptimized:"
+        BS.hPutStrLn stderr as
 
         ORC.withExecutionSession $ \es -> do
           let dylibName = "saft"

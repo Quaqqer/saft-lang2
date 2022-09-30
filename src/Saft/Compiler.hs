@@ -71,6 +71,10 @@ generateOuter stmt = error $ "Unexpected outer statment " ++ show stmt
 generateInner :: SS.Statement -> LLVMIR.IRBuilderT LLVMIR.ModuleBuilder ()
 generateInner (SS.Return {expr = SE.Void}) = retVoid
 generateInner (SS.Return {expr}) = ret $ generateExpr expr
+generateInner (SS.Let {identifier, type_, expr}) = do
+  ptr <- alloca (llvmType (fromJust type_)) Nothing 0
+  let val = generateExpr expr
+  store ptr 0 val
 generateInner stmt = error $ "Unexpected inner statement " ++ show stmt
 
 generateExpr :: SE.Expression -> LLVMAST.Operand
@@ -79,6 +83,8 @@ generateExpr (SE.Int i) = int32 (read $ Text.unpack i)
 generateExpr (SE.Float f) = double (read $ Text.unpack f)
 generateExpr SE.Void = error "Void cannot be converted to a LLVM value."
 
+-- TODO: The main function should be volatile to avoid LLVM optimizing away
+-- parameters for when I decide to pass argc and argv
 generateMain :: LLVMAST.Operand -> LLVMIR.ModuleBuilder ()
 generateMain mainIs = do
   _ <- function
