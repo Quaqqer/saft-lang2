@@ -29,12 +29,18 @@ The goals that the language have are the following:
 - Build tool
 
 # Progress
+
 ## What has been done
 
 - Tokens 8/10
+
 - Tokenizer 4/10
 
-## What is being done
+- Parser 8/10
 
-- Parsing
-- Ast
+- Compile to file 4/10
+
+  Should compile to file without need to link manually.
+  Do it with clang? Adds another dependency :-(
+
+- Jit 7/10

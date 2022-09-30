@@ -4,9 +4,9 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.IO.Exception (ExitCode (..))
 import Options.Applicative
-import Saft.Compiler (compileIR, generateIR, printIR)
+import Saft.Compiler (compileIR, generateIR)
 import Saft.Jit (runJit)
-import qualified Saft.Parser.Internal as SP
+import qualified Saft.Parser.Statement as SP
 import qualified Saft.Tokenizer as Tokenizer
 import System.Exit (exitFailure, exitWith)
 import Text.Megaparsec (errorBundlePretty, runParser)
@@ -76,7 +76,7 @@ cli = do
   modules_ <-
     mapM
       ( \(fn, tokens) ->
-          let mModule_ = runParser SP.module_ fn tokens
+          let mModule_ = runParser SP.pModule fn tokens
            in case mModule_ of
                 Right module_ -> return (fn, module_)
                 Left errBundle -> do

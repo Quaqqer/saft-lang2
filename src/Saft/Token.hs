@@ -18,6 +18,7 @@ import Text.Megaparsec hiding (tokens)
 data SToken
   -- Keywords
   = Let
+  | Return
   | Fn
 
   -- Symbols
@@ -37,7 +38,7 @@ data SToken
   | Operator T.Text
 
   -- Types
-  | TVoid
+  | TVoid -- Special case, both a type and a value
   | TBool
   | TInt
   | TFloat

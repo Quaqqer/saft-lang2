@@ -61,6 +61,7 @@ keyword =
         (\p -> lexeme (p <* notFollowedBy alphaNumChar))
         ( tokensFromList
             [ ("let", Let),
+              ("return", Return),
               ("fn", Fn),
               ("void", TVoid),
               ("bool", TBool),

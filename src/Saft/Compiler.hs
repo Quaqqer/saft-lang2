@@ -4,6 +4,7 @@
 module Saft.Compiler (generateIR, printIR, compileIR) where
 
 import qualified Data.ByteString.Char8 as BS
+import Data.Functor.Identity (Identity)
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.String (fromString)
@@ -18,28 +19,29 @@ import LLVM.IRBuilder.Instruction as LLVMIR
 import LLVM.IRBuilder.Module as LLVMIR
 import LLVM.IRBuilder.Monad as LLVMIR
 import qualified LLVM.Target as LLVM
-import qualified Saft.Ast.Module as S
-import qualified Saft.Ast.Statement as S
-import qualified Saft.Ast.Type as S
+import qualified Saft.Ast.Expression as SE
+import qualified Saft.Ast.Module as SM
+import qualified Saft.Ast.Statement as SS
+import qualified Saft.Ast.Type as ST
 
-llvmType :: S.Type -> LLVMAST.Type
+llvmType :: ST.Type -> LLVMAST.Type
 llvmType t = fromJust $ Map.lookup t m
   where
     m = Map.fromList typeEdges
     typeEdges =
-      [ (S.Void, LLVMAST.void),
-        (S.Bool, LLVMAST.i1),
-        (S.Int, LLVMAST.i32),
-        (S.Float, LLVMAST.double)
+      [ (ST.Void, LLVMAST.void),
+        (ST.Bool, LLVMAST.i1),
+        (ST.Int, LLVMAST.i32),
+        (ST.Float, LLVMAST.double)
       ]
 
-generateIR :: String -> Text -> S.Module -> LLVMAST.Module
-generateIR name mainIs (S.Module {body}) =
+generateIR :: String -> Text -> SM.Module -> LLVMAST.Module
+generateIR name mainIs (SM.Module {body}) =
   buildModule "saft.ll" $ do
     fns <-
       Map.fromList
         <$> mapM
-          ( \stmt@(S.Function {identifier}) -> do
+          ( \stmt@(SS.Function {identifier}) -> do
               fn <- generateOuter stmt
               return (identifier, fn)
           )
@@ -47,9 +49,9 @@ generateIR name mainIs (S.Module {body}) =
 
     generateMain (fromJust (Map.lookup mainIs fns))
 
-generateOuter :: S.Statement -> LLVMIR.ModuleBuilder LLVMAST.Operand
+generateOuter :: SS.Statement -> LLVMIR.ModuleBuilder LLVMAST.Operand
 generateOuter
-  ( S.Function
+  ( SS.Function
       { identifier,
         arguments,
         body,
@@ -61,9 +63,21 @@ generateOuter
         (LLVMAST.mkName ("s_" ++ Text.unpack identifier))
         (map (\(id', ty) -> (llvmType ty, fromString (Text.unpack id'))) arguments)
         (llvmType returnType)
-        $ \_ -> do
+        $ \_args -> do
           _entry <- block `named` "entry"
-          retVoid
+          mapM_ generateInner body
+generateOuter stmt = error $ "Unexpected outer statment " ++ show stmt
+
+generateInner :: SS.Statement -> LLVMIR.IRBuilderT LLVMIR.ModuleBuilder ()
+generateInner (SS.Return {expr = SE.Void}) = retVoid
+generateInner (SS.Return {expr}) = ret $ generateExpr expr
+generateInner stmt = error $ "Unexpected inner statement " ++ show stmt
+
+generateExpr :: SE.Expression -> LLVMAST.Operand
+generateExpr (SE.Bool b) = bit (if b then 1 else 0)
+generateExpr (SE.Int i) = int32 (read $ Text.unpack i)
+generateExpr (SE.Float f) = double (read $ Text.unpack f)
+generateExpr SE.Void = error "Void cannot be converted to a LLVM value."
 
 generateMain :: LLVMAST.Operand -> LLVMIR.ModuleBuilder ()
 generateMain mainIs = do

@@ -33,7 +33,9 @@ library
       Saft.Cli
       Saft.Compiler
       Saft.Jit
+      Saft.Parser.Expression
       Saft.Parser.Internal
+      Saft.Parser.Statement
       Saft.Token
       Saft.Tokenizer
   other-modules:
