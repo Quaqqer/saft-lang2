@@ -4,7 +4,7 @@ import Data.Text (Text)
 import Saft.Ast.Module
 import Saft.Ast.Statement
 import Saft.Ast.Type as Ty
-import Saft.Parser.Internal (module_)
+import Saft.Parser.Statement (pModule)
 import Saft.Token (TokenStream (TokenStream, streamInput, tokens))
 import Saft.Tokenizer
 import Test.Hspec
@@ -23,7 +23,7 @@ shouldParseModule text m =
       tokenStream = TokenStream {streamInput = text, tokens = tokens_}
    in do
         toks `shouldSucceedOn` text
-        parse module_ "" tokenStream `shouldParse` m
+        parse pModule "" tokenStream `shouldParse` m
 
 spec :: Spec
 spec = do

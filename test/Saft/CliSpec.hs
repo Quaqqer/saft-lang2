@@ -23,23 +23,39 @@ shouldNotParse = \case
   Failure _ -> return ()
   CompletionInvoked _ -> error "Should not invoke completion"
 
+shouldParse' a b = parse cliArgsInfo a `shouldParse` b
+
+shouldNotParse' = shouldNotParse . parse cliArgsInfo
+
+defaultCliArgs = CliArgs {mainIs = "main", outputFile = Nothing}
+
 parse :: ParserInfo a -> [String] -> ParserResult a
 parse = execParserPure defaultPrefs
 
 spec :: Spec
 spec = describe "cli parsing" $ do
-  it "parses modules" $ do
-    parse cliArgsInfo ["asd"]
-      `shouldParse` CliArgs {modules = ["asd"], mainIs = Nothing}
-    parse cliArgsInfo ["hello", "there"]
-      `shouldParse` CliArgs {modules = ["hello", "there"], mainIs = Nothing}
-    parse cliArgsInfo ["hello", "there"]
-      `shouldParse` CliArgs {modules = ["hello", "there"], mainIs = Nothing}
+  it "parses a single module" $ do
+    ["asd"] `shouldParse'` defaultCliArgs {modules = ["asd"]}
+
+  it "parses multiple modules" $ do
+    ["hello", "there"]
+      `shouldParse'`
+        defaultCliArgs {modules = ["hello", "there"]}
 
   it "fails when leaving out modules" $ do
-    shouldNotParse $ parse cliArgsInfo []
-    shouldNotParse $ parse cliArgsInfo ["--main-is", "main#main"]
+    shouldNotParse' ["--main-s", "main#main"]
 
   it "parses changing the main function" $ do
-    parse cliArgsInfo ["test", "--main-is", "test#main"]
-      `shouldParse` CliArgs {modules = ["test"], mainIs = Just "test#main"}
+    ["test", "--main-is", "test#main"]
+      `shouldParse'`
+        defaultCliArgs {modules = ["test"], mainIs = "test#main"}
+
+  it "parses output file" $ do
+    ["x", "--output-file", "asd"]
+      `shouldParse'`
+        defaultCliArgs {modules = ["x"], outputFile = Just "asd"}
+
+  it "parses output file with shorthand" $ do
+    ["x", "-o", "asd"]
+      `shouldParse'`
+        defaultCliArgs {modules = ["x"], outputFile = Just "asd"}
