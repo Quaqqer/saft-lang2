@@ -1,6 +1,6 @@
 # saft-lang
 
-Saft is a general purpose programming language, developed by me for fun.
+Saft is, one day going to be, a general purpose programming language, developed by me for fun.
 
 ## Goals
 
