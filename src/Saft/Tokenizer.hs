@@ -26,14 +26,13 @@ where
 import Control.Monad (liftM2)
 import Data.List (singleton)
 import qualified Data.Set as Set
-import qualified Data.Text as T
 import Data.Void (Void)
 import Saft.Token
 import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
-type Parser = Parsec Void T.Text
+type Parser = Parsec Void String
 
 -- | The space and comment consumer.
 sc :: Parser ()
@@ -57,7 +56,6 @@ identifier =
     lexeme $
       withPos $
         Identifier
-          . T.pack
           <$> liftM2 (:) (lowerChar <|> char '_') (many alphaNumChar)
 
 -- | The set of characters used in custom operators
@@ -66,7 +64,7 @@ operatorChars = Set.fromList "!#$%&*+./<=>?@\\^|-~:"
 
 -- | Parse an operator
 operator :: Parser (WithPos SToken)
-operator = try $ lexeme $ withPos $ Operator . T.pack <$> some (satisfy (`Set.member` operatorChars))
+operator = try $ lexeme $ withPos $ Operator <$> some (satisfy (`Set.member` operatorChars))
 
 -- | Parse a keyword
 keyword :: Parser (WithPos SToken)
@@ -111,16 +109,16 @@ symbols =
 
 -- | Parse a single integer
 integer :: Parser (WithPos SToken)
-integer = try $ lexeme $ withPos $ Int . T.pack <$> some numberChar
+integer = try $ lexeme $ withPos $ Int <$> some numberChar
 
 -- | Parse a single floating point number
 float :: Parser (WithPos SToken)
 float = try $
   lexeme $
     withPos $ do
-      i1 <- T.pack <$> some numberChar
+      i1 <- some numberChar
       _ <- char '.'
-      i2 <- T.pack <$> some numberChar
+      i2 <- some numberChar
       return (Float $ i1 <> "." <> i2)
 
 -- | Parse a string
@@ -132,7 +130,7 @@ string_ = try $
       str <-
         foldl (<>) ""
           <$> manyTill
-            (string "\\\"" <|> (T.pack . singleton <$> satisfy (const True)))
+            (string "\\\"" <|> (singleton <$> satisfy (const True)))
             (string "\"")
       return $ String str
 
@@ -158,7 +156,7 @@ withPos p = do
 -- | Make many parsers from a list
 tokensFromList ::
   -- | A list of text and its corresponding token
-  [(T.Text, SToken)] ->
+  [(String, SToken)] ->
   [Parser (WithPos SToken)]
 tokensFromList = map (\(s, t) -> withPos (t <$ string s))
 
@@ -185,8 +183,8 @@ tokenize ::
   -- | The file name
   String ->
   -- | The text to parse
-  T.Text ->
-  Either (ParseErrorBundle T.Text Void) TokenStream
+  String ->
+  Either (ParseErrorBundle String Void) TokenStream
 tokenize fileName text = do
   tokens_ <- runParser tokenizer fileName text
   return $ TokenStream {streamInput = text, tokens = tokens_}

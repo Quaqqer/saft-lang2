@@ -4,12 +4,9 @@
 module Saft.Compiler (generateIR, printIR, compileIR) where
 
 import qualified Data.ByteString.Char8 as BS
-import Data.Functor.Identity (Identity)
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.String (fromString)
-import Data.Text (Text)
-import qualified Data.Text as Text
 import qualified LLVM
 import qualified LLVM.AST as LLVMAST
 import qualified LLVM.AST.Type as LLVMAST
@@ -35,7 +32,7 @@ llvmType t = fromJust $ Map.lookup t m
         (ST.Float, LLVMAST.double)
       ]
 
-generateIR :: String -> Text -> SM.Module -> LLVMAST.Module
+generateIR :: String -> String -> SM.Module -> LLVMAST.Module
 generateIR name mainIs (SM.Module {body}) =
   buildModule "saft.ll" $ do
     fns <-
@@ -60,8 +57,8 @@ generateOuter
     ) =
     do
       function
-        (LLVMAST.mkName ("s_" ++ Text.unpack identifier))
-        (map (\(id', ty) -> (llvmType ty, fromString (Text.unpack id'))) arguments)
+        (LLVMAST.mkName ("s_" ++ identifier))
+        (map (\(id', ty) -> (llvmType ty, fromString (id'))) arguments)
         (llvmType returnType)
         $ \_args -> do
           _entry <- block `named` "entry"
@@ -79,8 +76,8 @@ generateInner stmt = error $ "Unexpected inner statement " ++ show stmt
 
 generateExpr :: SE.Expression -> LLVMAST.Operand
 generateExpr (SE.Bool b) = bit (if b then 1 else 0)
-generateExpr (SE.Int i) = int32 (read $ Text.unpack i)
-generateExpr (SE.Float f) = double (read $ Text.unpack f)
+generateExpr (SE.Int i) = int32 (read $ i)
+generateExpr (SE.Float f) = double (read $ f)
 generateExpr SE.Void = error "Void cannot be converted to a LLVM value."
 
 -- TODO: The main function should be volatile to avoid LLVM optimizing away

@@ -11,7 +11,6 @@ import Data.Data (Proxy (..))
 import qualified Data.List as List
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
-import qualified Data.Text as T
 import Text.Megaparsec hiding (tokens)
 
 {- ORMOLU_DISABLE -}
@@ -34,8 +33,8 @@ data SToken
   | Arrow      -- ->
 
   -- Identifiers and operators
-  | Identifier T.Text
-  | Operator T.Text
+  | Identifier String
+  | Operator String
 
   -- Types
   | TVoid -- Special case, both a type and a value
@@ -45,9 +44,9 @@ data SToken
 
   -- Data
   | Bool Bool
-  | Int T.Text
-  | Float T.Text
-  | String T.Text
+  | Int String
+  | Float String
+  | String String
 
   deriving (Show, Ord, Eq)
 {- ORMOLU_ENABLE -}
@@ -61,7 +60,7 @@ data WithPos a = WithPos
   deriving (Eq, Ord, Show)
 
 data TokenStream = TokenStream
-  { streamInput :: T.Text,
+  { streamInput :: String,
     tokens :: [WithPos SToken]
   }
   deriving (Show)
@@ -79,7 +78,7 @@ instance Stream TokenStream where
   take1_ (TokenStream str (t : ts)) =
     Just
       ( t,
-        TokenStream (T.drop (tokensLength pxy (t :| [])) str) ts
+        TokenStream (drop (tokensLength pxy (t :| [])) str) ts
       )
   takeN_ n (TokenStream str s)
     | n <= 0 = Just ([], TokenStream str s)
@@ -88,12 +87,12 @@ instance Stream TokenStream where
       let (x, s') = splitAt n s
        in case NE.nonEmpty x of
             Nothing -> Just (x, TokenStream str s')
-            Just nex -> Just (x, TokenStream (T.drop (tokensLength pxy nex) str) s')
+            Just nex -> Just (x, TokenStream (drop (tokensLength pxy nex) str) s')
   takeWhile_ f (TokenStream str s) =
     let (x, s') = List.span f s
      in case NE.nonEmpty x of
           Nothing -> (x, TokenStream str s')
-          Just nex -> (x, TokenStream (T.drop (tokensLength pxy nex) str) s')
+          Just nex -> (x, TokenStream (drop (tokensLength pxy nex) str) s')
 
 instance VisualStream TokenStream where
   showTokens Proxy =
@@ -105,7 +104,7 @@ instance VisualStream TokenStream where
 
 instance TraversableStream TokenStream where
   reachOffset o PosState {..} =
-    ( Just (prefix <> T.unpack restOfLine),
+    ( Just (prefix <> restOfLine),
       PosState
         { pstateInput =
             TokenStream
@@ -121,21 +120,21 @@ instance TraversableStream TokenStream where
     where
       prefix =
         if sameLine
-          then pstateLinePrefix <> T.unpack preLine
-          else T.unpack preLine
+          then pstateLinePrefix <> preLine
+          else preLine
       sameLine = sourceLine newSourcePos == sourceLine pstateSourcePos
       newSourcePos =
         case post of
           [] -> pstateSourcePos
           (x : _) -> startPos x
       (pre, post) = splitAt (o - pstateOffset) (tokens pstateInput)
-      (preStr, postStr) = T.splitAt tokensConsumed (streamInput pstateInput)
-      preLine = T.reverse . T.takeWhile (/= '\n') . T.reverse $ preStr
+      (preStr, postStr) = splitAt tokensConsumed (streamInput pstateInput)
+      preLine = reverse . takeWhile (/= '\n') . reverse $ preStr
       tokensConsumed =
         case NE.nonEmpty pre of
           Nothing -> 0
           Just nePre -> tokensLength pxy nePre
-      restOfLine = T.takeWhile (/= '\n') postStr
+      restOfLine = takeWhile (/= '\n') postStr
 
 pxy :: Proxy TokenStream
 pxy = Proxy

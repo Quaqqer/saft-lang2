@@ -1,7 +1,5 @@
 module Saft.Cli (CliArgs (..), cliArgs, cliArgsInfo, cli) where
 
-import Data.Text (Text)
-import qualified Data.Text as Text
 import GHC.IO.Exception (ExitCode (..))
 import Options.Applicative
 import Saft.Compiler (compileIR, generateIR)
@@ -13,7 +11,7 @@ import Text.Megaparsec (errorBundlePretty, runParser)
 
 data CliArgs = CliArgs
   { modules :: [String],
-    mainIs :: Text,
+    mainIs :: String,
     outputFile :: Maybe String
   }
   deriving (Show, Eq)
@@ -57,7 +55,7 @@ cli = do
 
   moduleFiles <-
     mapM
-      (\fileName -> (fileName,) . Text.pack <$> readFile fileName)
+      (\fileName -> (fileName,) <$> readFile fileName)
       modules
 
   moduleTokens <-

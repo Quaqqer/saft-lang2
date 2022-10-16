@@ -1,6 +1,5 @@
 module Saft.TokenizerSpec (spec) where
 
-import qualified Data.Text as T
 import Saft.Token
 import Saft.Tokenizer
 import Test.Hspec
@@ -21,7 +20,7 @@ shouldParseToken ::
   Expectation
 shouldParseToken parseResult = shouldParse (tokenVal <$> parseResult)
 
-shouldTokenize :: T.Text -> [SToken] -> Expectation
+shouldTokenize :: String -> [SToken] -> Expectation
 shouldTokenize text tokens_ = parse tokenizer "" text `shouldParseTokens` tokens_
 
 spec :: Spec

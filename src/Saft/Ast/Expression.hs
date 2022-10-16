@@ -1,10 +1,8 @@
 module Saft.Ast.Expression (Expression (..)) where
 
-import Data.Text (Text)
-
 data Expression
   = Void
   | Bool Bool
-  | Int Text
-  | Float Text
+  | Int String
+  | Float String
   deriving (Show, Eq)

@@ -1,6 +1,5 @@
 module Saft.ParserSpec (spec) where
 
-import Data.Text (Text)
 import Saft.Ast.Module
 import Saft.Ast.Statement
 import Saft.Ast.Type as Ty
@@ -11,7 +10,7 @@ import Test.Hspec
 import Test.Hspec.Megaparsec
 import Text.Megaparsec
 
-shouldParseModule :: Text -> Module -> IO ()
+shouldParseModule :: String -> Module -> IO ()
 shouldParseModule text m =
   let toks = parse tokenizer ""
       tokens_ = case toks text of

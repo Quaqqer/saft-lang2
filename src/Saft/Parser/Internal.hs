@@ -3,7 +3,6 @@ module Saft.Parser.Internal (Parser, liftMyToken, pToken, pIdent, pType) where
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.Set as Set
-import Data.Text (Text)
 import Data.Void (Void)
 import Saft.Ast.Type as Ty
 import Saft.Token as Tk
@@ -25,7 +24,7 @@ pToken c = token test (Set.singleton . Tokens . nes . liftMyToken $ c)
         else Nothing
     nes x = x :| []
 
-pIdent :: Parser Text
+pIdent :: Parser String
 pIdent = token test Set.empty <?> "identifier"
   where
     test (WithPos _ _ _ (Identifier i)) = Just i
