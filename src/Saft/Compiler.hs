@@ -1,12 +1,16 @@
+{-# LANGUAGE RecursiveDo #-}
 {-# OPTIONS_GHC -Wno-incomplete-record-updates #-}
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module Saft.Compiler (generateIR, printIR, compileIR) where
 
+import Control.Monad (void)
 import qualified Data.ByteString.Char8 as BS
+import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.String (fromString)
+import Debug.Trace (trace)
 import qualified LLVM
 import qualified LLVM.AST as LLVMAST
 import qualified LLVM.AST.Type as LLVMAST
@@ -34,20 +38,24 @@ llvmType t = fromJust $ Map.lookup t m
 
 generateIR :: String -> String -> SM.Module -> LLVMAST.Module
 generateIR name mainIs (SM.Module {body}) =
-  buildModule "saft.ll" $ do
-    fns <-
+  buildModule "saft.ll" $ mdo
+    globals <-
       Map.fromList
         <$> mapM
           ( \stmt@(SS.Function {identifier}) -> do
-              fn <- generateOuter stmt
+              fn <- generateOuter globals stmt
               return (identifier, fn)
           )
           body
 
-    generateMain (fromJust (Map.lookup mainIs fns))
+    generateMain (fromJust (Map.lookup mainIs globals))
 
-generateOuter :: SS.Statement -> LLVMIR.ModuleBuilder LLVMAST.Operand
+generateOuter ::
+  Map String LLVMAST.Operand ->
+  SS.Statement ->
+  LLVMIR.ModuleBuilder LLVMAST.Operand
 generateOuter
+  globals
   ( SS.Function
       { identifier,
         arguments,
@@ -62,23 +70,35 @@ generateOuter
         (llvmType returnType)
         $ \_args -> do
           _entry <- block `named` "entry"
-          mapM_ generateInner body
-generateOuter stmt = error $ "Unexpected outer statment " ++ show stmt
+          mapM_ (generateInner globals) body
+generateOuter _ stmt = error $ "Unexpected outer statment " ++ show stmt
 
-generateInner :: SS.Statement -> LLVMIR.IRBuilderT LLVMIR.ModuleBuilder ()
-generateInner (SS.Return {expr = SE.Void}) = retVoid
-generateInner (SS.Return {expr}) = ret $ generateExpr expr
-generateInner (SS.Let {identifier, type_, expr}) = do
+generateInner ::
+  Map String LLVMAST.Operand ->
+  SS.Statement ->
+  LLVMIR.IRBuilderT LLVMIR.ModuleBuilder ()
+generateInner _ (SS.Return {expr = SE.Void}) = retVoid
+generateInner globals (SS.Return {expr}) = do
+  op <- generateExpr globals expr
+  ret op
+generateInner globals (SS.Let {identifier, type_, expr}) = do
   ptr <- alloca (llvmType (fromJust type_)) Nothing 0
-  let val = generateExpr expr
+  val <- generateExpr globals expr
   store ptr 0 val
-generateInner stmt = error $ "Unexpected inner statement " ++ show stmt
+generateInner _ stmt = error $ "Unexpected inner statement " ++ show stmt
 
-generateExpr :: SE.Expression -> LLVMAST.Operand
-generateExpr (SE.Bool b) = bit (if b then 1 else 0)
-generateExpr (SE.Int i) = int32 (read i)
-generateExpr (SE.Float f) = double (read f)
-generateExpr SE.Void = error "Void cannot be converted to a LLVM value."
+generateExpr ::
+  Map String LLVMAST.Operand ->
+  SE.Expression ->
+  IRBuilderT ModuleBuilder LLVMAST.Operand
+generateExpr _ (SE.Bool b) = return $ bit (if b then 1 else 0)
+generateExpr _ (SE.Int i) = return $ int32 (read i)
+generateExpr _ (SE.Float f) = return $ double (read f)
+generateExpr globals (SE.Var i) = return $ fromJust $ Map.lookup i globals
+generateExpr globals (SE.Call {identifier, arguments}) = do
+  args <- mapM (fmap (,[]) . generateExpr globals) arguments
+  call (fromJust $ Map.lookup identifier globals) args
+generateExpr _ SE.Void = error "Void cannot be converted to a LLVM value."
 
 -- TODO: The main function should be volatile to avoid LLVM optimizing away
 -- parameters for when I decide to pass argc and argv

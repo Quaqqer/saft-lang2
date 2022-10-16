@@ -12,6 +12,8 @@ pExpr =
     <|> pBool
     <|> pInt
     <|> pFloat
+    <|> pCall
+    <|> pVar
 
 pVoid :: Parser Expr.Expression
 pVoid = Expr.Void <$ pToken TVoid
@@ -33,3 +35,14 @@ pFloat = Expr.Float <$> token test Set.empty <?> "float"
   where
     test (WithPos _ _ _ (Float f)) = Just f
     test _ = Nothing
+
+pCall :: Parser Expr.Expression
+pCall = do
+  identifier <- pIdent
+  _ <- pToken LParen
+  arguments <- sepBy pExpr (pToken Comma)
+  _ <- pToken RParen
+  return $ Expr.Call {identifier, arguments}
+
+pVar :: Parser Expr.Expression
+pVar = Expr.Var <$> pIdent
