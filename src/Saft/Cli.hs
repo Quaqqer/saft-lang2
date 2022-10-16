@@ -8,6 +8,7 @@ import qualified Saft.Parser.Statement as SP
 import qualified Saft.Tokenizer as Tokenizer
 import System.Exit (exitFailure, exitWith)
 import Text.Megaparsec (errorBundlePretty, runParser)
+import Prelude hiding (mod)
 
 data CliArgs = CliArgs
   { modules :: [String],
