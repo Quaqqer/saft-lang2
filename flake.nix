@@ -9,6 +9,7 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = [ pkgs.bashInteractive ];
           buildInputs = with pkgs; [
+            haskell-language-server
             stack
             ormolu
             hlint
