@@ -8,5 +8,5 @@ data Expression
   | Int String
   | Float String
   | Var Identifier
-  | Call { identifier :: Identifier, arguments :: [Expression]}
+  | Call {identifier :: Identifier, arguments :: [Expression]}
   deriving (Show, Eq)

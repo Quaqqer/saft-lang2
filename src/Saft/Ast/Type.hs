@@ -1,7 +1,9 @@
 module Saft.Ast.Type (Type (..)) where
 
 data Type
-  = Void
+  = -- | If the type is not specified
+    Unknown
+  | Void
   | Bool
   | Int
   | Float

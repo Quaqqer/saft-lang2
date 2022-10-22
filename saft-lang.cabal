@@ -38,6 +38,7 @@ library
       Saft.Parser.Statement
       Saft.Token
       Saft.Tokenizer
+      Saft.Typechecker
   other-modules:
       Paths_saft_lang
   hs-source-dirs:

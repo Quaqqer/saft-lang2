@@ -4,13 +4,11 @@
 
 module Saft.Compiler (generateIR, printIR, compileIR) where
 
-import Control.Monad (void)
 import qualified Data.ByteString.Char8 as BS
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.String (fromString)
-import Debug.Trace (trace)
 import qualified LLVM
 import qualified LLVM.AST as LLVMAST
 import qualified LLVM.AST.Type as LLVMAST
@@ -36,8 +34,8 @@ llvmType t = fromJust $ Map.lookup t m
         (ST.Float, LLVMAST.double)
       ]
 
-generateIR :: String -> String -> SM.Module -> LLVMAST.Module
-generateIR name mainIs (SM.Module {body}) =
+generateIR :: String -> String -> SM.Module ST.Type -> LLVMAST.Module
+generateIR moduleName mainIs (SM.Module {body}) =
   buildModule "saft.ll" $ mdo
     globals <-
       Map.fromList
@@ -52,7 +50,7 @@ generateIR name mainIs (SM.Module {body}) =
 
 generateOuter ::
   Map String LLVMAST.Operand ->
-  SS.Statement ->
+  SS.Statement ST.Type ->
   LLVMIR.ModuleBuilder LLVMAST.Operand
 generateOuter
   globals
@@ -75,14 +73,14 @@ generateOuter _ stmt = error $ "Unexpected outer statment " ++ show stmt
 
 generateInner ::
   Map String LLVMAST.Operand ->
-  SS.Statement ->
+  SS.Statement ST.Type->
   LLVMIR.IRBuilderT LLVMIR.ModuleBuilder ()
 generateInner _ (SS.Return {expr = SE.Void}) = retVoid
 generateInner globals (SS.Return {expr}) = do
   op <- generateExpr globals expr
   ret op
 generateInner globals (SS.Let {identifier, type_, expr}) = do
-  ptr <- alloca (llvmType (fromJust type_)) Nothing 0
+  ptr <- alloca (llvmType type_) Nothing 0
   val <- generateExpr globals expr
   store ptr 0 val
 generateInner _ stmt = error $ "Unexpected inner statement " ++ show stmt

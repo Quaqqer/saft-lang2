@@ -44,3 +44,8 @@ The goals that the language have are the following:
   Do it with clang? Adds another dependency :-(
 
 - Jit 7/10
+
+# Random mumbo jumbo
+
+- Lambda functions are structs with functions attached, ex.
+  struct { data: *data, fn: *(*data, ...) -> ...}

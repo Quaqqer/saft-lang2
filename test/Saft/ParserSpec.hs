@@ -10,7 +10,7 @@ import Test.Hspec
 import Test.Hspec.Megaparsec
 import Text.Megaparsec
 
-shouldParseModule :: String -> Module -> IO ()
+shouldParseModule :: String -> Module Type -> IO ()
 shouldParseModule text m =
   let toks = parse tokenizer ""
       tokens_ = case toks text of
