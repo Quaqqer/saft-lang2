@@ -1,0 +1,78 @@
+import assert; // Default import
+import os.path as path; // Alias import
+import { print } from console; // Import an export;
+
+
+function f(x: int, y: int) -> int {
+    return x + y;
+}
+
+enum Adt {
+    X(int),
+    XY(int, int),
+    XYZ {x: int, y: int, z: int},
+}
+
+function main() {
+}
+
+function loops() {
+    for (i: int = 0; i < 10; i++) {
+        print(i);
+    }
+
+    for i in range(10) {}
+
+    for i in 0..10 {}
+
+    for i in 0..=9 {}
+}
+
+import saft.int;
+
+// int is primitive, automatically copied in functions
+operator l: int + y: int -> int { return saft.int.add(x, y); }
+
+operator !b: bool {
+    return match b {
+        true => false,
+        false => true,
+    }
+}
+
+operator i: mut &int ++ -> int {
+    int old = i;
+    i = i + 1;
+    return old;
+}
+
+operator ++ i: mut &int -> int {
+    i = i + 1;
+    return i;
+}
+
+import saft.ptr;
+
+operator lhs: *T + rhs: int -> *T {
+    return saft.ptr.add(lhs, rhs);
+}
+
+function unsafe ptr_deref(ptr: *T) -> T {
+    ...
+}
+
+function ptr(ptr: *T) -> T {
+    ...
+}
+
+operator f: (A) => B |> g: (B) => C -> (A) => C {
+    return (a) => f(g(a));
+}
+
+function flip(f: (A, B, Tail..) => T) -> (B, A, Tail...) => T {
+    return (b, a, tail...) => f(a, b, tail...);
+}
+
+class Add L R {
+    operator L + R;
+}
