@@ -1,4 +1,4 @@
-module Saft.Parser.Statement (pModule) where
+module Saft.Parser.Statement (pModule, pInnerStmt) where
 
 import Data.Maybe (fromMaybe)
 import Saft.Ast.Module
@@ -7,7 +7,6 @@ import Saft.Ast.Type as Ty
 import Saft.Parser.Expression (pExpr)
 import Saft.Parser.Internal
 import Saft.Token as Tk
-import Text.Megaparsec
 
 pModule :: Parser (Module Type)
 pModule = Module <$> many pOuterStmt <* eof

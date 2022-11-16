@@ -28,6 +28,7 @@ library
       Saft.Ast.Expression
       Saft.Ast.Internal
       Saft.Ast.Module
+      Saft.Ast.Outer
       Saft.Ast.Statement
       Saft.Ast.Type
       Saft.Cli
@@ -35,6 +36,7 @@ library
       Saft.Jit
       Saft.Parser.Expression
       Saft.Parser.Internal
+      Saft.Parser.Outer
       Saft.Parser.Statement
       Saft.Token
       Saft.Tokenizer

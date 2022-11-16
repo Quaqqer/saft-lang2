@@ -1,4 +1,4 @@
-module Saft.Parser.Internal (Parser, liftMyToken, pToken, pIdent, pType) where
+module Saft.Parser.Internal (Parser, liftMyToken, pToken, pIdent, pType, module Text.Megaparsec) where
 
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty ((:|)))

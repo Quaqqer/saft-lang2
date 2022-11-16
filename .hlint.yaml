@@ -1,0 +1,16 @@
+- modules:
+    - name: Saft.Ast.Type
+      as: Ast.Type
+    - name: Saft.Ast.Type
+      only: [Type]
+      as: Ast
+    - name: Saft.Ast.Statement
+      as: Ast.Statement
+    - name: Saft.Ast.Statement
+      only: [Statement]
+      as: Ast
+    - name: Saft.Ast.Expression
+      as: Ast.Expression
+    - name: Saft.Ast.Expression
+      only: [Expression]
+      as: Ast
